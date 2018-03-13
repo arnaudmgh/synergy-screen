@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Combos exploration</title>
+        <script type="text/javascript" src="d3.v3.js"></script>
+        <script type="text/javascript" src="synergy_plots.js"></script>
+
+        <style>
+          body {background-color:#DDDDDD; overflow-y:scroll;}
+          h1   {color:blue}
+          p    {color:black; max-width: 40em;}
+          text {font: 12px sans-serif;}
+          svg  {display: block;}
+          div {background-color: #ffffff; max-width: 864px;}
+          #chart1 svg{
+            height: 2px;
+            min-width: 200px;
+            min-height: 2px;
+            max-width: 864px;
+            width: 864px
+            }
+            #chart2 svg{
+            height: 2px;
+            min-width: 200px;
+            min-height: 2px;
+            max-width: 864px;
+            width: 864px
+            }
+            label{
+              font: 12px sans-serif;
+            }
+            form#dlist {
+              columns: 2;
+              -moz-column-count: 2;
+            }
+
+            .x_axis line,
+            .y_axis line,
+            .x_axis, .y_axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+            }
+            .tick line{
+              opacity: 0.2;
+            }
+
+        </style>
+
+    </head>
+        <body>
+          <h1> Links to R code and data </h1>
+          <p><a href="https://github.com/arnaudmgh/melanoma-combos">Link to R code on github</a></p>
+            <p><a href="Rcode_and_data.tar.gz">Link to R code and data (.tar.gz)</a></p>
+            <h1>Visualization of the drug combination data</h1>
+            
+            <h3>Description</h3>
+
+            <p> This Web App provides vizualisation for the drug combination screen presented in "Statistical Assessment of Synergy in a Large Replicate-less Drug Combination Screen. (Submitted - 2016). Arnaud Amzallag, Julian Pruteanu-Malinici, Adam A. Friedman, Daniel A. Haber, Sridhar Ramaswamy, David E. Fisher, Cyril H. Benes."
+            </p>
+            <p>
+              The screen consists of all the 5788 possible pairs of 108 by 108 drugs, on 40 cell lines, at two concentrations. 
+            </p>
+              <p> There are two ways to plot the viabilities and significant synergies for each cell line: The <b>drug Pair Checkbox List</b> and the <b>Interactive Drug by Drug Heat Map</b>.
+              </p>
+
+    
+<!--             <p class=p2>click on a square</p> -->
+  <!--                           <h3>Description of the Viability plot</h3>
+                            <p>Click on the heat map below to plot the viabilities of the combination</p>
+                            <p>Red circles show the observed viability of the combination, black circles
+                              show the expected viability of the drug combination under the assumption of Bliss independence
+                              (no synergy). Blue and green rectangles show the single drug viabilities. Error bars have corresponding colors and show the 95% confidence intervals. Significant synergies are indicated by a black bold tick mark below the graph (pink for antagonism). </p>
+ -->
+
+            <!-- <a href="#c1">go</a> -->
+            <h3> Drug Pair Checkbox List </h3>
+            <p> You may search for a drug name or a target name with the "find in page" function of your web browser
+              (control+F). To plot the viabilities over the 40 cell lines, check two boxes and press the "Plot Selected Drug Pair" button bellow the list. The viability graph will appear with an explantory title and legend. At the same time, the Drug Pair is selected in the Drug Drug Heat Map (below the viability graph), indicated by a green square, so you can compare the drug pair score with the other drug pairs, in a visual way. 
+            </p>
+
+            <form id="dlist">
+            </form>
+            <button onclick="dcheck()">Plot Selected Drug Pair</button>
+
+            <a name="c1"></a>
+            <div id=pcombo style='background:white; text-align:center; font: 14px sans-serif;'></div>
+
+          <div id="chart1" style="position: relative;">
+              <svg><!--rect width="100%" height="100%" fill="white">-->
+             </svg>
+          </div>
+          <div id="chart2" style="position: relative;">
+              <svg><!--rect width="100%" height="100%" fill="white">-->
+             </svg>
+          </div>
+          <h3> Interactive Drug by Drug Heatmap </h3>
+             <p>
+                Below, the interactive heat map represents the synergy scores for all the 108 by 108 drug combinations tested in the screen, ordered from the drug with the most synergies to drugs showing the least number of synergies. Each combination was tested at 2 concentrations on 40 melanoma cell lines. By default, the absolute synergy score is plotted in the heat map (i.e. the number of cell lines in which synergy was observed for the given combination).
+              </p>
+
+              <p>
+                The heat map below is interactive: if you glide the mouse over the plot, the name of the drugs are plotted. If you click on a data square, details about the combination are plotted about the graph: known targets of the drugs, absolute synergy score and specificity score. Additionally a bar plot appears with the viabilities (for the high dose assay) of the combination over all cell lines tested. 
+              </p>
+
+
+            <svg id="combosquare" width=108 height=108>
+              <rect width=1000 height=900 fill="white"/>
+            </svg>
+
+        <h3>Choose Variable for the Color Scale</h3>
+            <form>
+              <p>
+              <i>Don't forget to press the </i><b>Update</b><i> bellow after you make you selection</i><br>              
+              <input type="radio" name="colors" id="syn" checked>Absolute Synergy Score (number of cell lines where the combination showed significant synergy)<br>
+              <input type="radio" name="colors" id="spec">Synergy Specificity Score (Absolute score compared with other combinations involving one of the two drugs)<br>
+              <input type="radio" name="colors" id="both">Absolute Score in the upper right triangle and Specificity Score in lower left triangle<br>
+            </p>
+            </form>
+  
+            <button onclick="updateColor()">Update</button>
+
+
+       <script type="text/javascript"> 
+        var dnames = [];
+        var firstpass = true;
+        var pairdict = {};
+         var svg = d3.select("#combosquare"); // select the big svg
+         svg.attr("width", 1000).attr("height", 110*8);
+           svg.select("rect").attr("width", 108*8).attr("height", 110*8);
+         //var mypath = [[25, 25, "blue"], [50, 10, "red"], [70, 40, "blue"], [90,10, "red"]];
+           //var thecsv = [];
+           //var cpt=0;
+           function plotheatmap(colfunc) {
+            d3.csv("combo_ranking_n.syn_score_web.csv", function(error, cdat){
+               console.log("csv loaded"); // d3.select("#pcombo").html("okfunc <br>"); 
+               if (dnames.length !== 0) {firstpass = false};
+               //console.log(cdat[50]);
+               //thecsv = cdat;
+               //cdat.forEach(function(d, i) {
+               //   cdat[i] = d;
+               //})
+               //console.log(cdat.filter(function(d) {return d["Drug.num1"] == 1})["Drug2"])
+                svg.selectAll(".datarect").remove();
+               svg.selectAll(".datarect").data(cdat).enter() // , function(d) {return (d["Drug.num1"]+"_"+d["Drug.num2"]);}
+                 .append("rect").attr("class", "datarect")
+                   .attr("x", function(d) {
+                        // Here, in addition to plot the datarect, we collect the drug names for the drug list
+                       if (d["Drug.num1"]==1) {
+                        if (d["Drug.num2"]==1) {dnames.push([d["Drug1"], d["Drug1.target"]])};
+                        dnames.push([d["Drug2"], d["Drug2.target"]]);
+                       }
+                       // Creating a dict (an "object" in javascript parlance) to retrieve synergy scores from the checkboxes
+                       pairdict[d["Drug1"]+"_"+d["Drug2"]] = [d["Drug.num1"], d["Drug.num2"], d["n.syn"], d["n.syn.score"]]
+                       pairdict[d["Drug2"]+"_"+d["Drug1"]] = [d["Drug.num1"], d["Drug.num2"], d["n.syn"], d["n.syn.score"]]
+
+                       return -8+8*Number(d["Drug.num1"]);})
+                   .attr("y", function(d) { return 8+8*Number(d["Drug.num2"]);})
+                   .attr("width", 7).attr("height", 7)
+
+                   .attr("fill", colfunc) // FILL WITH argument colfunc of function plotheatmap (see below for definitions of colfunc functions)
+                    .on('mouseover', function(d) { 
+                            //console.log("selection:");
+                            //console.log(cdatd1[0][1]);
+                            thi = d3.select(this);
+                            //thi.attr("fill", "blue");
+                            svg.selectAll("text").remove();
+                            svg.selectAll(".bigrect").remove();
+                            svg.append("text").attr("x", +thi.attr("x")+8)
+      		                     .attr("y", +thi.attr("y")-2)
+                               .text(d["Drug1"]+" --- "+d["Drug2"]+" ("+d["n.syn"]+")")
+
+                           svg.append("rect")
+                           .attr("x", d3.select(this).attr("y") - 2 - 16)
+                           .attr("y", d3.select(this).attr("x") - 2 + 16)
+                           .attr("fill-opacity", "0").attr("stroke", "black").attr("stroke-width", "3")
+                           .attr("height", 11).attr("width", 11).classed({'bigrect':true});
+                           
+                           svg.append
+                           //svg.append("rect")
+                           // .attr("x", d3.select(this).attr("x")- -1)
+                           // .attr("y", d3.select(this).attr("y")- -8) // minus minus ten: trick to convert the first element to Number
+                           // .attr("fill-opacity", "0").attr("stroke", "black").attr("stroke-width", "2")
+                           // .attr("height", 1).attr("width", 5).classed({'bigrect':true});
+                           
+
+                    })
+                  .on('click', selectpair);
+                  //console.log(dnames);
+                  //d3.select("body").append("form").attr("id", "dlist")
+
+                  if (firstpass) {
+
+                    dlist=d3.select("#dlist")
+                    dlist.selectAll("label").remove()
+                    dlist.selectAll("input").data(dnames).enter()
+                      .append("label")
+                          .text(function(d) {return d[0] + " (" + d[1] + ")"})
+                      .append("input")
+                        .attr("type", "checkbox")
+                        .attr("name", "drug")
+                        //.attr("checked", "false")
+                        .attr("value", function(d) {return d[0]})
+                        .attr("id", function(d) {return d[1]})
+                      dlist.selectAll("label").append("br")
+
+                  }
+
+                }); // END d3.csv
+                
+              };
+              plotheatmap(colfuncsyn, 'mouseover');
+               function colfuncboth(d) {
+                       if (Number(d["Drug.num1"])<Number(d["Drug.num2"])) return d3.hsl(0,0.5,1-Number(d["n.syn"])/40)
+                       else return d3.hsl(200,0.2,1-Number(d["n.syn.score"])/5)
+                     }
+
+               function colfuncsyn(d) { return d3.hsl(0,0.5,1-Number(d["n.syn"])/40) };
+               function colfuncspec(d) { return d3.hsl(200,0.2,1-Number(d["n.syn.score"])/5) };
+
+              function updateColor() {                        
+                        if (document.getElementById("syn").checked == true) {plotheatmap(colfuncsyn)};
+                        if (document.getElementById("spec").checked == true) {plotheatmap(colfuncspec)};
+                        if (document.getElementById("both").checked == true) {plotheatmap(colfuncboth)};
+                    }
+
+              // function selectpair(d) {
+              //                                 //
+              //             // PRINTING THE DETAILS OF THE COMBINATIONS AT THE TOP OF THE PAGE
+              //             //
+              //               // d3.select("#pcombo").html("<font color='#3377FF'>" + d["Drug1"] + " ("+d["Drug1.target"]+")</font>"+"<br>"+"<font color='green'>"+d["Drug2"]+" ("+d["Drug2.target"]+")</font>"+"<br> "+d["n.syn"]+
+              //                 d3.select("#pcombo").html(d["Drug1"]+" ("+d["Drug1.target"]+") "+"<br>"+d["Drug2"]+" ("+d["Drug2.target"]+")"+"<br> "+d["n.syn"]+
+              //                 " cell lines showed synergy.<br> Synergy Specificity Score: "+d["n.syn.score"])
+              //               //subplot('http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]);
+              //               plotit("high", d3.select('#chart1 svg'), myurl='http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]) //plotit("high", svg1)
+              //               plotit("low", d3.select('#chart2 svg'), myurl='http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]) //plotit("high", svg1)
+              //               //plotit("low", svg2)
+              //               svg.selectAll(".persisrect").remove();
+
+              //               // Move browser page towards graph
+              //               u = location.href
+              //               if (!u.endsWith("#c1")) location.href = u + "#c1" 
+              //               else {location.href = location.href.slice(0, -3) + "#c1"
+ 
+              //               svg.append("rect")
+              //              .attr("x", d3.select(this).attr("x") - 2)
+              //              .attr("y", d3.select(this).attr("y") - 2)
+              //              .attr("fill-opacity", "0").attr("stroke", "green").attr("stroke-width", "2")
+              //              .attr("height", 11).attr("width", 11).classed({'persisrect':true});
+
+              //                 //location.href = location.href + "#c1"
+              //               }
+
+              //    }
+
+             function selectpair(d) {
+                                              //
+                          // PRINTING THE DETAILS OF THE COMBINATIONS AT THE TOP OF THE PAGE
+                          //
+                            // d3.select("#pcombo").html("<font color='#3377FF'>" + d["Drug1"] + " ("+d["Drug1.target"]+")</font>"+"<br>"+"<font color='green'>"+d["Drug2"]+" ("+d["Drug2.target"]+")</font>"+"<br> "+d["n.syn"]+
+                              d3.select("#pcombo").html(d["Drug1"]+" ("+d["Drug1.target"]+") "+"<br>"+d["Drug2"]+" ("+d["Drug2.target"]+")"+"<br> "+d["n.syn"]+
+                              " cell lines showed synergy.<br> Synergy Specificity Score: "+Number(d["n.syn.score"]).toPrecision(3)+"<br> Error bars show the 95% confidence intervals. <br> Significant synergies are indicated by a black bold tick mark below the graph (pink for antagonism).")
+                            //subplot('http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]);
+                            plotit("high", d3.select('#chart1 svg'), myurl='http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]) //plotit("high", svg1)
+                            plotit("low", d3.select('#chart2 svg'), myurl='http://'+location.hostname+':3000/q?Drug1='+d["Drug1"]+'&Drug2='+d["Drug2"]) //plotit("high", svg1)
+                            //plotit("low", svg2)
+                            svg.selectAll(".persisrect").remove();
+
+                           svg.append("rect")
+                           .attr("x", -8+8*Number(d["Drug.num1"]) - 2)
+                           .attr("y", 8+8*Number(d["Drug.num2"]) - 2)
+                           .attr("height", 11).attr("width", 11).classed({'persisrect':true})
+                           .transition()
+                           .attr("fill-opacity", "0").attr("stroke", "green").attr("stroke-width", "2")
+                           .duration(2500);
+                           
+                            // Move browser page towards graph
+                            u = location.href
+                            if (!u.endsWith("#c1")) location.href = u + "#c1" 
+                            else {location.href = location.href.slice(0, -3) + "#c1"
+ 
+                              //location.href = location.href + "#c1"
+                            }
+
+                 }
+
+
+
+
+              function dcheck() {
+                checked = document.querySelectorAll('input[name=drug]:checked');
+                //console.log("checked[0]: "+checked[0].dtarg)
+                // console.log("checked[1]: "+checked[1].value)
+                if (checked.length != 2) alert(checked.length + " drugs selected; please select exactly 2 drugs")
+                else {
+                  d = [];
+                  d.Drug1 = checked[0].value;
+                  d.Drug2 = checked[1].value;
+                  d["Drug1.target"] = checked[0].getAttribute("id") //checked[0][1];
+                  d["Drug2.target"] = checked[1].getAttribute("id") //checked[1][1];
+                  tmp = pairdict[d.Drug1+"_"+d.Drug2]
+                  d["Drug.num1"] = tmp[0]
+                  d["Drug.num2"] = tmp[1]
+                  d["n.syn"] = tmp[2]
+                  d["n.syn.score"] = tmp[3]
+                  console.log(d);
+                  //console.log("check: "+ pairdict[d.Drug1+"_"+d.Drug2])
+                  selectpair(d);
+
+                  // console.log("in dcheck"+location.href)
+                  // location.href = location.href + "#c1" 
+
+                }
+                // return checked
+              }
+
+       </script>
+
+    </body>
+</html>
+
