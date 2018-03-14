@@ -31,6 +31,6 @@ on the command line. It should take between 5 and 10 minutes to run.
 * Run `combos_script.R` (see above) to produce the summarized data files that are used for the web visualization.
 * Install [npm](https://docs.npmjs.com/getting-started/installing-node), since the web app is running on Node.js,
 a lightweight web server written in javascript. 
-* From the directory `combo_web`, run `rpm install`
+* From the directory `combo_web`, run `rpm install` (you might need `sudo npm install`, on ubuntu for instance). 
 * Run `node server.js`
 * In a web browser, go to `http://localhost:3000/combo_app.html`
