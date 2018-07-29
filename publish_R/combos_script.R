@@ -37,7 +37,7 @@ outdir <- "newoutdir"
 dir.create(outdir)
 
 ## LOADING THE RAW DATA
-rawscreen <- read_csv("./data/rawscreen.csv")
+rawscreen <- read_csv("../data/rawscreen.csv")
 
 
 
