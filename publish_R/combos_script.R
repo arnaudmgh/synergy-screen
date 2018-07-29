@@ -37,8 +37,9 @@ outdir <- "newoutdir"
 dir.create(outdir)
 
 ## LOADING THE RAW DATA
-#rawscreen <- readRDS(file=file.path(".", "rawscreen.rds"))
-rawscreen <- read_csv("http://a-a-public-bucket.s3.amazonaws.com/rawscreen.csv.gz")
+rawscreen <- read_csv("./data/rawscreen.csv")
+
+
 
 ## COLUMN and ROW determine the position on the plate
 ## Nuclei is the counted number of
