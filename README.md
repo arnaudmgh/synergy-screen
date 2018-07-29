@@ -1,9 +1,8 @@
 # synergy-screen
 
 ## Purpose
-This git repo contains the companion code the manuscript *Statistical Assessment of Synergy
-in a Large Replicate-less Drug Combination Screen*, by Arnaud Amzallag, Julian Pruteanu-Malinici,
-Adam A. Friedman, Daniel A. Haber, Sridhar Ramaswamy, David E. Fisher, Cyril H. Benes, from the MGH Cancer Center.
+This git repo contains the companion code the manuscript *Statistical Assessment and Visualization of Synergies for Large-Scale Sparse Drug Combination Datasets*, by Arnaud Amzallag, Julian Pruteanu-Malinici,
+Sridhar Ramaswamy, Cyril H. Benes, from the MGH Cancer Center.
 
 This script allows to reproduce, from raw data, the statistical analysis for the significance assessment of synergies in
 the systematic drug screen performed at the MGH Cancer Center. The script is thoroughly commented and is intended to be
