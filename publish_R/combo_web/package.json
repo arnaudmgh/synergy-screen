@@ -2,7 +2,7 @@
   "name": "combo_web",
   "version": "0.0.1",
   "description": "Interactive Visual Interface to the CMT Melanoma Combination Data",
-  "main": "server03.js",
+  "main": "server.js",
   "dependencies": {
     "d3": "~3.5.3",
     "express": "~4.11.2",
