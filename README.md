@@ -1,8 +1,7 @@
 # synergy-screen
 
 ## Purpose
-This git repo contains the companion code the manuscript *Statistical Assessment and Visualization of Synergies for Large-Scale Sparse Drug Combination Datasets*, by Arnaud Amzallag, Julian Pruteanu-Malinici,
-Sridhar Ramaswamy, Cyril H. Benes, from the MGH Cancer Center.
+This git repo contains the companion code the manuscript *Statistical Assessment and Visualization of Synergies for Large-Scale Sparse Drug Combination Datasets*, by Arnaud Amzallag, Sridhar Ramaswamy, Cyril H. Benes, from the MGH Cancer Center.
 
 This script allows to reproduce, from raw data, the statistical analysis for the significance assessment of synergies in
 the systematic drug screen performed at the MGH Cancer Center. The script is thoroughly commented and is intended to be
@@ -17,8 +16,13 @@ viabilities provided, which is available at http://www.cmtlab.org:3000/combo_app
 
 ## Usage
 
+### Pre-requisites
+We recommand running the R analysis on a machine with at least 8 Gb of memory.
+
+The following packages must be installed: `dplyr`, `reshape2`, `readr` and `ggplot2`. 
+
 ### Processing in R
-To understand the processing and analysis steps from raw data, one can follow the commented script `combos_script.R`.
+To understand the processing and analysis steps from raw data, we recommand to follow the commented script `combos_script.R` and execute it line by line.
 However, if you just want to obtain all the output files at once (including the necessary files to run the web app),
 you can run the full script with
 ```
@@ -33,3 +37,7 @@ a lightweight web server written in javascript.
 * From the directory `combo_web`, run `rpm install` (you might need `sudo npm install`, on ubuntu for instance). 
 * Run `node server.js`
 * In a web browser, go to `http://localhost:3000/combo_app.html`
+
+### Troubleshooting
+* `node server.js` returns `Error: ENOENT: no such file or directory, open './combo_all_combos2.csv'`. Have you run the R script `combos_script.R`, and did it write the file `combo_all_combos2.csv` in the right directory (`combo_web`)?
+* The script does not finish: It could be that your machine does not have enough memory. We recommend at least 8 Gb of memory.
