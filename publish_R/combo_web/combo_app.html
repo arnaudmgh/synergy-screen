@@ -54,18 +54,18 @@
           <p><a href="https://github.com/arnaudmgh/synergy-screen">Link to the code on github (analysis in R and web app in javascript)</a></p>
 
             <h1>Visualization of the drug combination data</h1>
-            
+
             <h3>Description</h3>
 
-            <p> This Web App provides vizualisation for the drug combination screen presented in "Statistical Assessment of Synergy in a Large Replicate-less Drug Combination Screen. Arnaud Amzallag,  Sridhar Ramaswamy and Cyril H. Benes."
+            <p> This Web App provides visualization for the drug combination screen presented in "Statistical Assessment of Synergy in a Large Replicate-less Drug Combination Screen. Arnaud Amzallag,  Sridhar Ramaswamy and Cyril H. Benes."
             </p>
             <p>
-              The screen consists of all the 5788 possible pairs of 108 by 108 drugs, on 40 cell lines, at two concentrations. 
+              The screen consists of all the 5788 possible pairs of 108 by 108 drugs, on 40 cell lines, at two concentrations.
             </p>
               <p> There are two ways to plot the viabilities and significant synergies for each cell line: The <b>drug Pair Checkbox List</b> and the <b>Interactive Drug by Drug Heat Map</b>.
               </p>
 
-    
+
 <!--             <p class=p2>click on a square</p> -->
   <!--                           <h3>Description of the Viability plot</h3>
                             <p>Click on the heat map below to plot the viabilities of the combination</p>
@@ -77,7 +77,7 @@
             <!-- <a href="#c1">go</a> -->
             <h3> Drug Pair Checkbox List </h3>
             <p> You may search for a drug name or a target name with the "find in page" function of your web browser
-              (control+F). To plot the viabilities over the 40 cell lines, check two boxes and press the "Plot Selected Drug Pair" button bellow the list. The viability graph will appear with an explantory title and legend. At the same time, the Drug Pair is selected in the Drug Drug Heat Map (below the viability graph), indicated by a green square, so you can compare the drug pair score with the other drug pairs, in a visual way. 
+              (control+F). To plot the viabilities over the 40 cell lines, check two boxes and press the "Plot Selected Drug Pair" button bellow the list. The viability graph will appear with an explantory title and legend. At the same time, the Drug Pair is selected in the Drug Drug Heat Map (below the viability graph), indicated by a green square, so you can compare the drug pair score with the other drug pairs, in a visual way.
             </p>
 
             <form id="dlist">
@@ -101,19 +101,19 @@
               </p>
 
               <p>
-                The heat map below is interactive: if you glide the mouse over the plot, the name of the drugs are plotted. If you click on a data square, details about the combination are plotted about the graph: known targets of the drugs, absolute synergy score and specificity score. Additionally a bar plot appears with the viabilities (for the high dose assay) of the combination over all cell lines tested. 
+                The heat map below is interactive: if you glide the mouse over the plot, the name of the drugs are plotted. If you click on a data square, details about the combination are plotted about the graph: known targets of the drugs, absolute synergy score and specificity score. Additionally a bar plot appears with the viabilities (for the high dose assay) of the combination over all cell lines tested.
               </p>
 
         <h3>Choose Variable for the Color Scale</h3>
             <form>
               <p>
-              <i>Don't forget to press the </i><b>Update</b><i> bellow after you make you selection</i><br>              
+              <i>Don't forget to press the </i><b>Update</b><i> bellow after you make you selection</i><br>
               <input type="radio" name="colors" id="syn" checked>Absolute Synergy Score (number of cell lines where the combination showed significant synergy)<br>
               <input type="radio" name="colors" id="spec">Synergy Specificity Score (Absolute score compared with other combinations involving one of the two drugs)<br>
               <input type="radio" name="colors" id="both">Absolute Score in the upper right triangle and Specificity Score in lower left triangle<br>
             </p>
             </form>
-  
+
             <button onclick="updateColor()">Update</button>
 
             <svg id="combosquare" width=108 height=108>
@@ -121,7 +121,7 @@
             </svg>
 
 
-       <script type="text/javascript"> 
+       <script type="text/javascript">
         var dnames = [];
         var firstpass = true;
         var pairdict = {};
@@ -133,7 +133,7 @@
            //var cpt=0;
            function plotheatmap(colfunc) {
             d3.csv("combo_ranking_n.syn_score_web.csv", function(error, cdat){
-               console.log("csv loaded"); // d3.select("#pcombo").html("okfunc <br>"); 
+               console.log("csv loaded"); // d3.select("#pcombo").html("okfunc <br>");
                if (dnames.length !== 0) {firstpass = false};
                //console.log(cdat[50]);
                //thecsv = cdat;
@@ -159,7 +159,7 @@
                    .attr("width", 7).attr("height", 7)
 
                    .attr("fill", colfunc) // FILL WITH argument colfunc of function plotheatmap (see below for definitions of colfunc functions)
-                    .on('mouseover', function(d) { 
+                    .on('mouseover', function(d) {
                             //console.log("selection:");
                             //console.log(cdatd1[0][1]);
                             thi = d3.select(this);
@@ -175,14 +175,14 @@
                            .attr("y", d3.select(this).attr("x") - 2 + 16)
                            .attr("fill-opacity", "0").attr("stroke", "black").attr("stroke-width", "3")
                            .attr("height", 11).attr("width", 11).classed({'bigrect':true});
-                           
+
                            svg.append
                            //svg.append("rect")
                            // .attr("x", d3.select(this).attr("x")- -1)
                            // .attr("y", d3.select(this).attr("y")- -8) // minus minus ten: trick to convert the first element to Number
                            // .attr("fill-opacity", "0").attr("stroke", "black").attr("stroke-width", "2")
                            // .attr("height", 1).attr("width", 5).classed({'bigrect':true});
-                           
+
 
                     })
                   .on('click', selectpair);
@@ -207,7 +207,7 @@
                   }
 
                 }); // END d3.csv
-                
+
               };
               plotheatmap(colfuncsyn, 'mouseover');
                function colfuncboth(d) {
@@ -218,7 +218,7 @@
                function colfuncsyn(d) { return d3.hsl(0,0.5,1-Number(d["n.syn"])/40) };
                function colfuncspec(d) { return d3.hsl(200,0.2,1-Number(d["n.syn.score"])/5) };
 
-              function updateColor() {                        
+              function updateColor() {
                         if (document.getElementById("syn").checked == true) {plotheatmap(colfuncsyn)};
                         if (document.getElementById("spec").checked == true) {plotheatmap(colfuncspec)};
                         if (document.getElementById("both").checked == true) {plotheatmap(colfuncboth)};
@@ -239,9 +239,9 @@
 
               //               // Move browser page towards graph
               //               u = location.href
-              //               if (!u.endsWith("#c1")) location.href = u + "#c1" 
+              //               if (!u.endsWith("#c1")) location.href = u + "#c1"
               //               else {location.href = location.href.slice(0, -3) + "#c1"
- 
+
               //               svg.append("rect")
               //              .attr("x", d3.select(this).attr("x") - 2)
               //              .attr("y", d3.select(this).attr("y") - 2)
@@ -273,12 +273,12 @@
                            .transition()
                            .attr("fill-opacity", "0").attr("stroke", "green").attr("stroke-width", "2")
                            .duration(2500);
-                           
+
                             // Move browser page towards graph
                             u = location.href
-                            if (!u.endsWith("#c1")) location.href = u + "#c1" 
+                            if (!u.endsWith("#c1")) location.href = u + "#c1"
                             else {location.href = location.href.slice(0, -3) + "#c1"
- 
+
                               //location.href = location.href + "#c1"
                             }
 
@@ -308,7 +308,7 @@
                   selectpair(d);
 
                   // console.log("in dcheck"+location.href)
-                  // location.href = location.href + "#c1" 
+                  // location.href = location.href + "#c1"
 
                 }
                 // return checked
@@ -318,4 +318,3 @@
 
     </body>
 </html>
-
