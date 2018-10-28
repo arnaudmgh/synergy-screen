@@ -104,11 +104,6 @@
                 The heat map below is interactive: if you glide the mouse over the plot, the name of the drugs are plotted. If you click on a data square, details about the combination are plotted about the graph: known targets of the drugs, absolute synergy score and specificity score. Additionally a bar plot appears with the viabilities (for the high dose assay) of the combination over all cell lines tested. 
               </p>
 
-
-            <svg id="combosquare" width=108 height=108>
-              <rect width=1000 height=900 fill="white"/>
-            </svg>
-
         <h3>Choose Variable for the Color Scale</h3>
             <form>
               <p>
@@ -120,6 +115,10 @@
             </form>
   
             <button onclick="updateColor()">Update</button>
+
+            <svg id="combosquare" width=108 height=108>
+              <rect width=1000 height=900 fill="white"/>
+            </svg>
 
 
        <script type="text/javascript"> 
