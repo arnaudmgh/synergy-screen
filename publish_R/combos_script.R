@@ -226,9 +226,9 @@ write.csv(tmpsinglet, row.names=FALSE, file=file.path(".", outdir, "singlets_via
 ## ONE PANEL PER CELL LINE 
 pdf(file.path(".", outdir, "singlets_measured_vs_regressed.pdf"), he=20, wi=20)
 qplot(viab.sing, 10^-est.log.sing, data=subset(tmpsinglet, !grepl("_lo$", cell.line))) + xlab("Measured viability") + ylab("Regressed viability") +
-		facet_wrap(~ cell.line, scale="free") + coord_fixed() + geom_abline(slope=1) + ggtitle("High dose")
+		facet_wrap(~ cell.line, scale="free") + geom_abline(slope=1) + ggtitle("High dose")
 qplot(viab.sing, 10^-est.log.sing, data=subset(tmpsinglet, grepl("_lo$", cell.line))) + xlab("Measured viability") + ylab("Regressed viability") +
-		facet_wrap(~ cell.line, scale="free") + coord_fixed() + geom_abline(slope=1) + ggtitle("Low dose")
+		facet_wrap(~ cell.line, scale="free") + geom_abline(slope=1) + ggtitle("Low dose")
 dev.off()
 
 ## ONE PANEL PER DRUG
