@@ -38,6 +38,18 @@ a lightweight web server written in javascript.
 * Run `node server.js`
 * In a web browser, go to `http://localhost:3000/combo_app.html`
 
+### Running with Docker
+For convenience, a docker image is available on dockerhub.org, and the current web application can be started with the following command:
+```
+    docker run --rm -p 3000:3000 -d arnaudmgh/synergy-screen-app
+```
+The Dockerfile is available in this repository.
+
+### Running with Docker on AWS
+Additionally, the script aws-init.sh can be used as User Data to start an AWS instance (from a standard Amazon AMI) to host the web application in a private AWS cloud. 
+* The security group should allow TCP port 3000 inbound from anywhere;
+* The web application will be accessible at `http://<your-instance-IP>:3000/combo_app.html`
+
 ### Troubleshooting
 * `node server.js` returns `Error: ENOENT: no such file or directory, open './combo_all_combos2.csv'`. Have you run the R script `combos_script.R`, and did it write the file `combo_all_combos2.csv` in the right directory (`combo_web`)?
 * The script does not finish: It could be that your machine does not have enough memory. We recommend at least 8 Gb of memory.
