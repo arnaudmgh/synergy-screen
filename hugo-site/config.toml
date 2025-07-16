@@ -1,7 +1,6 @@
-baseURL = 'https://synergy-screen.example.com'
+baseURL = 'http://localhost:1313'
 languageCode = 'en-us'
 title = 'Synergy Screen - Drug Combination Visualization'
-theme = 'basic'
 
 [params]
   description = "Interactive visualization for drug combination synergy screen data"

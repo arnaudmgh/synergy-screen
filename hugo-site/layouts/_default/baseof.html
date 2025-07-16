@@ -92,14 +92,28 @@
                             if (d["Drug.num2"]==1) {dnames.push([d["Drug1"], d["Drug1.target"]])};
                             dnames.push([d["Drug2"], d["Drug2.target"]]);
                         }
-                        return 8*(d["Drug.num1"]-1)
+                        // Creating a dict (an "object" in javascript parlance) to retrieve synergy scores from the checkboxes
+                        pairdict[d["Drug1"]+"_"+d["Drug2"]] = [d["Drug.num1"], d["Drug.num2"], d["n.syn"], d["n.syn.score"]];
+                        pairdict[d["Drug2"]+"_"+d["Drug1"]] = [d["Drug.num1"], d["Drug.num2"], d["n.syn"], d["n.syn.score"]];
+                        
+                        return -8+8*Number(d["Drug.num1"]);
                     })
-                    .attr("y", function(d) {return 8*(d["Drug.num2"]-1)})
-                    .attr("width", 8).attr("height", 8)
+                    .attr("y", function(d) { return 8+8*Number(d["Drug.num2"]); })
+                    .attr("width", 7).attr("height", 7)
                     .attr("fill", function(d) {return colfunc(d)})
-                    .attr("stroke", "black").attr("stroke-width", 0.2)
-                    .on("mouseover", function(d, i) {
-                        d3.select("#pcombo").html("<b>"+d["Drug1"]+"</b> vs <b>"+d["Drug2"]+"</b>");
+                    .on('mouseover', function(d) {
+                        var thi = d3.select(this);
+                        svg.selectAll("text").remove();
+                        svg.selectAll(".bigrect").remove();
+                        svg.append("text").attr("x", +thi.attr("x")+8)
+                                .attr("y", +thi.attr("y")-2)
+                               .text(d["Drug1"]+" --- "+d["Drug2"]+" ("+d["n.syn"]+")")
+
+                        svg.append("rect")
+                           .attr("x", d3.select(this).attr("y") - 2 - 16)
+                           .attr("y", d3.select(this).attr("x") - 2 + 16)
+                           .attr("fill-opacity", "0").attr("stroke", "black").attr("stroke-width", "3")
+                           .attr("height", 11).attr("width", 11).classed({'bigrect':true});
                     })
                     .on("click", function(d, i) {
                         // Updated to work with static files
@@ -108,14 +122,17 @@
 
                 if (firstpass) {
                     // populate the drug list on first pass only
-                    var myform = d3.select("#dlist");
-                    myform.selectAll("label").data(dnames).enter().append("label")
-                        .text(function(d) {return " " + d[0] + " (" + d[1] + ")"})
+                    var dlist = d3.select("#dlist");
+                    dlist.selectAll("label").remove();
+                    dlist.selectAll("input").data(dnames).enter()
+                        .append("label")
+                            .text(function(d) {return d[0] + " (" + d[1] + ")"})
                         .append("input")
-                        .attr("type", "checkbox")
-                        .attr("value", function(d) {return d[0]});
-                    
-                    myform.selectAll("label").append("br");
+                          .attr("type", "checkbox")
+                          .attr("name", "drug")
+                          .attr("value", function(d) {return d[0]})
+                          .attr("id", function(d) {return d[1]});
+                    dlist.selectAll("label").append("br");
                 }
             });
         }
@@ -140,22 +157,50 @@
                             d3.select("#pcombo").html('<span style="color:red;">Error: drug combination not found</span>');
                         } else {
                             processCombinationData(data2, metadata);
+                            if (metadata) addVisualHighlight(metadata);
                         }
                     });
                 } else {
                     processCombinationData(data, metadata);
+                    if (metadata) addVisualHighlight(metadata);
                 }
             });
         }
 
+        function addVisualHighlight(d) {
+            // Remove any existing highlights
+            svg.selectAll(".persisrect").remove();
+            
+            // Add green highlight rectangle like in original
+            svg.append("rect")
+               .attr("x", -8+8*Number(d["Drug.num1"]) - 2)
+               .attr("y", 8+8*Number(d["Drug.num2"]) - 2)
+               .attr("height", 11).attr("width", 11).classed({'persisrect':true})
+               .transition()
+               .attr("fill-opacity", "0").attr("stroke", "green").attr("stroke-width", "2")
+               .duration(2500);
+
+            // Move browser page towards graph
+            var u = location.href;
+            if (!u.endsWith("#c1")) location.href = u + "#c1";
+            else {location.href = location.href.slice(0, -3) + "#c1"};
+        }
+
         function processCombinationData(data, metadata) {
-            // Display metadata
-            d3.select("#pcombo").html(
-                "<b>" + data.drug1 + "</b> vs <b>" + data.drug2 + "</b><br>" +
-                "Records: " + data.recordCount + "<br>" +
-                (metadata ? ("Synergy Score: " + (metadata["absolute.synergy.score"] || "N/A") + "<br>" +
-                "Specificity Score: " + (metadata["specificity.score"] || "N/A")) : "")
-            );
+            // Display metadata like in the original
+            if (metadata) {
+                d3.select("#pcombo").html(
+                    metadata["Drug1"]+" ("+metadata["Drug1.target"]+") "+"<br>"+
+                    metadata["Drug2"]+" ("+metadata["Drug2.target"]+")"+"<br> "+
+                    metadata["n.syn"]+" cell lines showed synergy.<br> Synergy Specificity Score: "+
+                    Number(metadata["n.syn.score"]).toPrecision(3)+"<br> Error bars show the 95% confidence intervals. <br> Significant synergies are indicated by a black bold tick mark below the graph (pink for antagonism)."
+                );
+            } else {
+                d3.select("#pcombo").html(
+                    "<b>" + data.drug1 + "</b> vs <b>" + data.drug2 + "</b><br>" +
+                    "Records: " + data.recordCount
+                );
+            }
 
             // Parse CSV data for plotting
             const csvData = d3.csv.parse(data.csvData);
@@ -181,15 +226,23 @@
         }
 
         function dcheck() {
-            var checkedDrugs = [];
-            d3.selectAll("#dlist input[type=checkbox]:checked").each(function() {
-                checkedDrugs.push(this.value);
-            });
-            
-            if (checkedDrugs.length === 2) {
-                loadDrugCombination(checkedDrugs[0], checkedDrugs[1], null);
+            var checked = document.querySelectorAll('input[name=drug]:checked');
+            if (checked.length != 2) {
+                alert(checked.length + " drugs selected; please select exactly 2 drugs");
             } else {
-                alert("Please select exactly 2 drugs");
+                var d = {};
+                d.Drug1 = checked[0].value;
+                d.Drug2 = checked[1].value;
+                d["Drug1.target"] = checked[0].getAttribute("id");
+                d["Drug2.target"] = checked[1].getAttribute("id");
+                var tmp = pairdict[d.Drug1+"_"+d.Drug2];
+                d["Drug.num1"] = tmp[0];
+                d["Drug.num2"] = tmp[1];
+                d["n.syn"] = tmp[2];
+                d["n.syn.score"] = tmp[3];
+                console.log(d);
+                
+                loadDrugCombination(d.Drug1, d.Drug2, d);
             }
         }
 
@@ -199,30 +252,19 @@
             var colorFunction;
             switch(selectedOption) {
                 case "syn":
-                    colorFunction = function(d) {
-                        var score = +d["absolute.synergy.score"];
-                        return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
-                    };
+                    colorFunction = function(d) { return d3.hsl(0,0.5,1-Number(d["n.syn"])/40) };
                     break;
                 case "spec":
-                    colorFunction = function(d) {
-                        var score = +d["specificity.score"];
-                        return d3.scale.linear().domain([0, 1]).range(["white", "blue"])(score);
-                    };
+                    colorFunction = function(d) { return d3.hsl(200,0.2,1-Number(d["n.syn.score"])/5) };
                     break;
                 case "both":
                     colorFunction = function(d) {
-                        if (+d["Drug.num1"] <= +d["Drug.num2"]) {
-                            var score = +d["absolute.synergy.score"];
-                            return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
-                        } else {
-                            var score = +d["specificity.score"];
-                            return d3.scale.linear().domain([0, 1]).range(["white", "blue"])(score);
-                        }
+                        if (Number(d["Drug.num1"])<Number(d["Drug.num2"])) return d3.hsl(0,0.5,1-Number(d["n.syn"])/40)
+                        else return d3.hsl(200,0.2,1-Number(d["n.syn.score"])/5)
                     };
                     break;
                 default:
-                    colorFunction = function(d) { return "lightgray"; };
+                    colorFunction = function(d) { return d3.hsl(0,0.5,1-Number(d["n.syn"])/40) };
             }
             
             plotheatmap(colorFunction);
@@ -230,11 +272,8 @@
 
         // Initialize the visualization
         document.addEventListener('DOMContentLoaded', function() {
-            // Default color function (absolute synergy score)
-            var defaultColorFunction = function(d) {
-                var score = +d["absolute.synergy.score"];
-                return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
-            };
+            // Default color function (absolute synergy score) using HSL like original
+            var defaultColorFunction = function(d) { return d3.hsl(0,0.5,1-Number(d["n.syn"])/40) };
             
             plotheatmap(defaultColorFunction);
         });

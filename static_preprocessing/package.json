@@ -8,6 +8,8 @@
     "install": "npm install d3@3.5.3"
   },
   "dependencies": {
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
     "d3": "~3.5.3"
   },
   "keywords": [
