@@ -210,18 +210,52 @@
         }
 
         function plotSynergyData(csvData, drug1, drug2) {
-            // Filter for high and low dose data
-            const highDoseData = csvData.filter(d => d.conc === "high");
-            const lowDoseData = csvData.filter(d => d.conc === "low");
+            console.log("Plotting synergy data for", drug1, "vs", drug2);
+            console.log("Raw CSV data length:", csvData.length);
             
-            // Plot high dose data
+            // Transform the data using the same logic as transformCSVRow function
+            const transformedData = csvData.map(function(d) {
+                return {
+                    labell: d['cell.line2'], 
+                    val: +d.viab, 
+                    conc: d.conc, 
+                    padj: d.padj, 
+                    Drug1: d.Drug1, 
+                    Drug2: d.Drug2,
+                    sing1: Math.pow(10, -d['est.log.sing1']), 
+                    sing2: Math.pow(10, -d['est.log.sing2']),
+                    sing1low: Math.pow(10, -d['est.log.sing1']+1.96*d['sd.log.sing1']),
+                    sing1high: Math.pow(10, -d['est.log.sing1']-1.96*d['sd.log.sing1']),
+                    sing2low: Math.pow(10, -d['est.log.sing2']+1.96*d['sd.log.sing2']),
+                    sing2high: Math.pow(10, -d['est.log.sing2']-1.96*d['sd.log.sing2']),
+                    addlow: Math.pow(10, -d['est.log.sing1']) * Math.pow(10, -d['est.log.sing2']),
+                    addlowlow: Math.pow(10, -d['est.log.sing1']+1.96*d['sd.log.sing1']) * Math.pow(10, -d['est.log.sing2']+1.96*d['sd.log.sing2']),
+                    addlowhigh: Math.pow(10, -d['est.log.sing1']-1.96*d['sd.log.sing1']) * Math.pow(10, -d['est.log.sing2']-1.96*d['sd.log.sing2']),
+                    // Missing red error bar calculations!
+                    comblow: Math.pow(10, Math.log10(+d.viab) - 1.96*d['noise.control.log']),
+                    combhigh: Math.pow(10, Math.log10(+d.viab) + 1.96*d['noise.control.log']),
+                    sdexpected: Math.pow(Math.pow(d['sd.log.sing1'], 2) + Math.pow(d['sd.log.sing2'], 2), 1/2)
+                };
+            });
+            
+            console.log("Transformed data sample:", transformedData[0]);
+            
+            // Filter for high and low dose data
+            const highDoseData = transformedData.filter(d => d.conc === "high");
+            const lowDoseData = transformedData.filter(d => d.conc === "low");
+            
+            console.log("High dose data length:", highDoseData.length);
+            console.log("Low dose data length:", lowDoseData.length);
+            
+            // Plot using the modified plotit function that uses the full dataset for x-axis
             if (highDoseData.length > 0) {
-                plotit("high", d3.select("#chart1 svg"), null, highDoseData);
+                console.log("Plotting high dose data");
+                plotit("high", d3.select("#chart1 svg"), null, transformedData);
             }
             
-            // Plot low dose data  
             if (lowDoseData.length > 0) {
-                plotit("low", d3.select("#chart2 svg"), null, lowDoseData);
+                console.log("Plotting low dose data");
+                plotit("low", d3.select("#chart2 svg"), null, transformedData);
             }
         }
 
