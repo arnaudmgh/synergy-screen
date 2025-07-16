@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ .Title }} - {{ .Site.Title }}</title>
+    <meta name="description" content="{{ .Site.Params.description }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- D3.js -->
+    <script type="text/javascript" src="{{ "/js/d3.v3.js" | relURL }}"></script>
+    <!-- Custom synergy plots -->
+    <script type="text/javascript" src="{{ "/js/synergy_plots_static.js" | relURL }}"></script>
+
+    <style>
+        body {background-color:#DDDDDD; overflow-y:scroll;}
+        h1   {color:blue}
+        p    {color:black; max-width: 40em;}
+        text {font: 12px sans-serif;}
+        svg  {display: block;}
+        div {background-color: #ffffff; max-width: 864px;}
+        #chart1 svg{
+            height: 2px;
+            min-width: 200px;
+            min-height: 2px;
+            max-width: 864px;
+            width: 864px
+        }
+        #chart2 svg{
+            height: 2px;
+            min-width: 200px;
+            min-height: 2px;
+            max-width: 864px;
+            width: 864px
+        }
+        label{
+            font: 12px sans-serif;
+        }
+        form#dlist {
+            columns: 2;
+            column-count: 2;
+            -moz-column-count: 2;
+        }
+
+        .x_axis line,
+        .y_axis line,
+        .x_axis, .y_axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        .tick line{
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    {{ .Content }}
+
+    <script type="text/javascript">
+        var dnames = [];
+        var firstpass = true;
+        var pairdict = {};
+        var svg = d3.select("#combosquare"); // select the big svg
+        svg.attr("width", 1000).attr("height", 110*8);
+        svg.select("rect").attr("width", 108*8).attr("height", 110*8);
+
+        // Static site configuration
+        window.SYNERGY_CONFIG = {
+            dataPath: '{{ "/data/" | relURL }}',
+            combinationsPath: '{{ "/data/combinations/" | relURL }}',
+            manifestPath: '{{ "/data/combinations_manifest.json" | relURL }}',
+            rankingPath: '{{ "/data/combo_ranking_n.syn_score_web.csv" | relURL }}'
+        };
+
+        function plotheatmap(colfunc) {
+            // Load the ranking CSV from static file
+            d3.csv(window.SYNERGY_CONFIG.rankingPath, function(error, cdat){
+                if (error) {
+                    console.error("Error loading ranking data:", error);
+                    return;
+                }
+                
+                console.log("csv loaded"); // d3.select("#pcombo").html("okfunc <br>");
+                if (dnames.length !== 0) {firstpass = false};
+                
+                svg.selectAll(".datarect").remove();
+                svg.selectAll(".datarect").data(cdat).enter()
+                    .append("rect").attr("class", "datarect")
+                    .attr("x", function(d) {
+                        // Here, in addition to plot the datarect, we collect the drug names for the drug list
+                        if (d["Drug.num1"]==1) {
+                            if (d["Drug.num2"]==1) {dnames.push([d["Drug1"], d["Drug1.target"]])};
+                            dnames.push([d["Drug2"], d["Drug2.target"]]);
+                        }
+                        return 8*(d["Drug.num1"]-1)
+                    })
+                    .attr("y", function(d) {return 8*(d["Drug.num2"]-1)})
+                    .attr("width", 8).attr("height", 8)
+                    .attr("fill", function(d) {return colfunc(d)})
+                    .attr("stroke", "black").attr("stroke-width", 0.2)
+                    .on("mouseover", function(d, i) {
+                        d3.select("#pcombo").html("<b>"+d["Drug1"]+"</b> vs <b>"+d["Drug2"]+"</b>");
+                    })
+                    .on("click", function(d, i) {
+                        // Updated to work with static files
+                        loadDrugCombination(d["Drug1"], d["Drug2"], d);
+                    });
+
+                if (firstpass) {
+                    // populate the drug list on first pass only
+                    var myform = d3.select("#dlist");
+                    myform.selectAll("label").data(dnames).enter().append("label")
+                        .text(function(d) {return " " + d[0] + " (" + d[1] + ")"})
+                        .append("input")
+                        .attr("type", "checkbox")
+                        .attr("value", function(d) {return d[0]});
+                    
+                    myform.selectAll("label").append("br");
+                }
+            });
+        }
+
+        // Updated function to load drug combinations from static files
+        function loadDrugCombination(drug1, drug2, metadata) {
+            // Create filename using the same logic as the preprocessing script
+            const sanitize = (name) => name.replace(/[^a-zA-Z0-9-_]/g, '_');
+            let filename = `${sanitize(drug1)}_${sanitize(drug2)}.json`;
+            let url = window.SYNERGY_CONFIG.combinationsPath + filename;
+            
+            // Try primary combination
+            d3.json(url, function(error, data) {
+                if (error) {
+                    // Try reverse combination
+                    filename = `${sanitize(drug2)}_${sanitize(drug1)}.json`;
+                    url = window.SYNERGY_CONFIG.combinationsPath + filename;
+                    
+                    d3.json(url, function(error2, data2) {
+                        if (error2) {
+                            console.error('Drug combination not found:', drug1, drug2);
+                            d3.select("#pcombo").html('<span style="color:red;">Error: drug combination not found</span>');
+                        } else {
+                            processCombinationData(data2, metadata);
+                        }
+                    });
+                } else {
+                    processCombinationData(data, metadata);
+                }
+            });
+        }
+
+        function processCombinationData(data, metadata) {
+            // Display metadata
+            d3.select("#pcombo").html(
+                "<b>" + data.drug1 + "</b> vs <b>" + data.drug2 + "</b><br>" +
+                "Records: " + data.recordCount + "<br>" +
+                (metadata ? ("Synergy Score: " + (metadata["absolute.synergy.score"] || "N/A") + "<br>" +
+                "Specificity Score: " + (metadata["specificity.score"] || "N/A")) : "")
+            );
+
+            // Parse CSV data for plotting
+            const csvData = d3.csv.parse(data.csvData);
+            
+            // Call plotting functions with the parsed data
+            plotSynergyData(csvData, data.drug1, data.drug2);
+        }
+
+        function plotSynergyData(csvData, drug1, drug2) {
+            // Filter for high and low dose data
+            const highDoseData = csvData.filter(d => d.conc === "high");
+            const lowDoseData = csvData.filter(d => d.conc === "low");
+            
+            // Plot high dose data
+            if (highDoseData.length > 0) {
+                plotit("high", d3.select("#chart1 svg"), null, highDoseData);
+            }
+            
+            // Plot low dose data  
+            if (lowDoseData.length > 0) {
+                plotit("low", d3.select("#chart2 svg"), null, lowDoseData);
+            }
+        }
+
+        function dcheck() {
+            var checkedDrugs = [];
+            d3.selectAll("#dlist input[type=checkbox]:checked").each(function() {
+                checkedDrugs.push(this.value);
+            });
+            
+            if (checkedDrugs.length === 2) {
+                loadDrugCombination(checkedDrugs[0], checkedDrugs[1], null);
+            } else {
+                alert("Please select exactly 2 drugs");
+            }
+        }
+
+        function updateColor() {
+            var selectedOption = d3.select("input[name=colors]:checked").attr("id");
+            
+            var colorFunction;
+            switch(selectedOption) {
+                case "syn":
+                    colorFunction = function(d) {
+                        var score = +d["absolute.synergy.score"];
+                        return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
+                    };
+                    break;
+                case "spec":
+                    colorFunction = function(d) {
+                        var score = +d["specificity.score"];
+                        return d3.scale.linear().domain([0, 1]).range(["white", "blue"])(score);
+                    };
+                    break;
+                case "both":
+                    colorFunction = function(d) {
+                        if (+d["Drug.num1"] <= +d["Drug.num2"]) {
+                            var score = +d["absolute.synergy.score"];
+                            return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
+                        } else {
+                            var score = +d["specificity.score"];
+                            return d3.scale.linear().domain([0, 1]).range(["white", "blue"])(score);
+                        }
+                    };
+                    break;
+                default:
+                    colorFunction = function(d) { return "lightgray"; };
+            }
+            
+            plotheatmap(colorFunction);
+        }
+
+        // Initialize the visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default color function (absolute synergy score)
+            var defaultColorFunction = function(d) {
+                var score = +d["absolute.synergy.score"];
+                return d3.scale.linear().domain([0, 40]).range(["white", "red"])(score);
+            };
+            
+            plotheatmap(defaultColorFunction);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Hugo build outputs
+hugo-site/public/
+hugo-site/resources/
+
+# Preprocessing outputs
+static_preprocessing/node_modules/
+static_preprocessing/combo_all_combos2.csv
+static_preprocessing/combo_ranking_n.syn_score_web.csv
+
+# Generated data files
+hugo-site/static/data/combinations/
+hugo-site/static/data/combinations_manifest.json
+hugo-site/static/data/combo_ranking_n.syn_score_web.csv
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Hugo cache
+hugo-site/.hugo_build.lock
