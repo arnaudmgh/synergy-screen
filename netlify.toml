@@ -1,6 +1,6 @@
 [build]
   publish = "hugo-site/public"
-  command = "cd hugo-site && hugo --gc --minify"
+  command = "cd static_preprocessing && npm install && npm run preprocess && cd ../hugo-site && hugo --gc --minify"
 
 [build.environment]
   HUGO_VERSION = "0.148.1"
