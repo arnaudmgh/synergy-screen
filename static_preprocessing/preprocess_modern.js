@@ -15,9 +15,9 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 // Configuration
 const INPUT_CSV = './combo_all_combos2.csv';
-const OUTPUT_DIR = '../hugo-site/static/data/combinations';
+const OUTPUT_DIR = '../hugo-site/data/combinations';
 const RANKING_CSV = './combo_ranking_n.syn_score_web.csv';
-const RANKING_OUTPUT = '../hugo-site/static/data/combo_ranking_n.syn_score_web.csv';
+const RANKING_OUTPUT = '../hugo-site/data/combo_ranking_n.syn_score_web.csv';
 
 // Alternative input files to check
 const ALTERNATIVE_INPUTS = [
