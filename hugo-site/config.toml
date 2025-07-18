@@ -1,4 +1,4 @@
-baseURL = 'http://localhost:1313'
+baseURL = 'https://arnaudmgh.github.io/synergy-screen'
 languageCode = 'en-us'
 title = 'Synergy Screen - Drug Combination Visualization'
 
