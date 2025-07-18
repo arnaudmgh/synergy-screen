@@ -1,0 +1,6 @@
+[build]
+  publish = "hugo-site/public"
+  command = "cd hugo-site && hugo --gc --minify"
+
+[build.environment]
+  HUGO_VERSION = "0.148.1"
