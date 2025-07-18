@@ -1,5 +1,11 @@
 # synergy-screen
 
+> **⚠️ WARNING:**  
+> The new URL for the synergy-screen app is [https://synergy-screen.netlify.app/](https://synergy-screen.netlify.app/).  
+> Please update your bookmarks
+
+See [README_STATIC_CONVERSION.md](README_STATIC_CONVERSION.md) for details about the static site conversion process.
+
 ## Purpose
 This git repo contains the companion code the manuscript *Statistical Assessment and Visualization of Synergies for Large-Scale Sparse Drug Combination Datasets*, by Arnaud Amzallag, Sridhar Ramaswamy, Cyril H. Benes, from the MGH Cancer Center.
 
