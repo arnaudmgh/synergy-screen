@@ -18,7 +18,7 @@ this code should:
 * facilitate follow-up analysis and exploration of the large combination data published with the study
 
 In addition, it provide the code of a web app for rapid interactive visualization of the 439,128 drug combination
-viabilities provided, which is available at http://www.cmtlab.org:3000/combo_app.html
+viabilities provided, which is available at [https://synergy-screen.netlify.app/](https://synergy-screen.netlify.app/)
 
 **NEW**: This repository also includes a static Hugo website version that provides the same visualization capabilities
 without requiring a Node.js server. The static site can be deployed to any web hosting service.
