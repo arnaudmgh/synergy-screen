@@ -2,15 +2,14 @@
   "name": "synergy-screen-static-preprocessing",
   "version": "1.0.0",
   "description": "Preprocessing scripts to convert dynamic Node.js app to static files",
-  "main": "preprocess.js",
+  "main": "preprocess_modern.js",
   "scripts": {
-    "preprocess": "node preprocess.js",
-    "install": "npm install d3@3.5.3"
+    "preprocess": "node preprocess_modern.js",
+    "start": "node preprocess_modern.js"
   },
   "dependencies": {
     "csv-parser": "^3.2.0",
-    "csv-writer": "^1.6.0",
-    "d3": "~3.5.3"
+    "csv-writer": "^1.6.0"
   },
   "keywords": [
     "static",

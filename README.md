@@ -14,7 +14,35 @@ this code should:
 In addition, it provide the code of a web app for rapid interactive visualization of the 439,128 drug combination
 viabilities provided, which is available at http://www.cmtlab.org:3000/combo_app.html
 
+**NEW**: This repository also includes a static Hugo website version that provides the same visualization capabilities
+without requiring a Node.js server. The static site can be deployed to any web hosting service.
+
 ## Usage
+
+### Static Hugo Website (Recommended)
+
+The static Hugo website provides the same drug combination visualization without requiring a running server:
+
+1. **Run data preprocessing** (required before building the Hugo site):
+   ```bash
+   cd static_preprocessing/
+   ./preprocess_modern.sh
+   ```
+
+2. **Build and serve the Hugo site**:
+   ```bash
+   cd ../hugo-site/
+   # For development with live reload:
+   hugo server
+   # Or build static files for deployment:
+   hugo
+   ```
+
+3. **Access the site**:
+   - Development: `http://localhost:1313`
+   - Production: Deploy the `public/` folder to any web hosting service
+
+**Important**: You must run the preprocessing script (`preprocess_modern.sh`) before starting Hugo, as it generates the required data files that the Hugo site depends on.
 
 ### Pre-requisites
 We recommand running the R analysis on a machine with at least 8 Gb of memory.
@@ -30,7 +58,10 @@ you can run the full script with
 ```
 on the command line. It should take between 5 and 10 minutes to run. 
 
-### Running the web application
+### Running the legacy web application (Node.js server)
+
+**Note**: This is the original dynamic web application. For most use cases, the static Hugo website (above) is recommended.
+
 * Run `combos_script.R` (see above) to produce the summarized data files that are used for the web visualization.
 * Install [npm](https://docs.npmjs.com/getting-started/installing-node), since the web app is running on Node.js,
 a lightweight web server written in javascript. 

@@ -22,8 +22,7 @@ const RANKING_OUTPUT = '../hugo-site/static/data/combo_ranking_n.syn_score_web.c
 // Alternative input files to check
 const ALTERNATIVE_INPUTS = [
     './combo_all_combos2.csv',
-    '../data/rawscreen.csv',
-    '../publish_R/plos_drug_names_match_with_targets.csv'
+    '../publish_R/combo_web/combo_all_combos2.csv'
 ];
 
 // Ensure output directory exists
@@ -172,13 +171,26 @@ async function preprocessData() {
                     console.log(`Successfully generated ${fileCount} static files in ${OUTPUT_DIR}`);
 
                     // Copy ranking file if it exists
-                    if (fs.existsSync(RANKING_CSV)) {
-                        console.log("Copying ranking CSV file...");
-                        ensureDirectoryExists(path.dirname(RANKING_OUTPUT));
-                        fs.copyFileSync(RANKING_CSV, RANKING_OUTPUT);
-                        console.log(`Ranking file copied to ${RANKING_OUTPUT}`);
-                    } else {
-                        console.warn(`Warning: Ranking file ${RANKING_CSV} not found. You may need to copy it manually.`);
+                    const rankingSources = [
+                        RANKING_CSV,
+                        '../publish_R/combo_web/combo_ranking_n.syn_score_web.csv'
+                    ];
+                    
+                    let rankingFound = false;
+                    for (const rankingSource of rankingSources) {
+                        if (fs.existsSync(rankingSource)) {
+                            console.log(`Copying ranking CSV file from ${rankingSource}...`);
+                            ensureDirectoryExists(path.dirname(RANKING_OUTPUT));
+                            fs.copyFileSync(rankingSource, RANKING_OUTPUT);
+                            console.log(`Ranking file copied to ${RANKING_OUTPUT}`);
+                            rankingFound = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!rankingFound) {
+                        console.warn(`Warning: Ranking file not found. Looked for:`);
+                        rankingSources.forEach(src => console.warn(`  - ${src}`));
                     }
 
                     // Generate a manifest file with all available combinations
