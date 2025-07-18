@@ -2,6 +2,15 @@ baseURL = 'http://localhost:1313'
 languageCode = 'en-us'
 title = 'Synergy Screen - Drug Combination Visualization'
 
+# Ignore files and directories that shouldn't trigger rebuilds
+ignoreFiles = [
+  "static/data/.*",
+  "static_preprocessing/.*",
+  "node_modules/.*",
+  "\\.tmp$",
+  "\\.log$"
+]
+
 [params]
   description = "Interactive visualization for drug combination synergy screen data"
   author = "Arnaud Amzallag"
