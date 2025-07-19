@@ -1,0 +1,6 @@
+# Redirect all traffic to root - regardless of path or query params
+# /* / 301
+
+# Alternative: More specific redirects if needed
+/combo_app.html* / 301
+/:3000/* / 301
